@@ -10,6 +10,7 @@ class OpUser(models.Model):
     score = models.IntegerField()
     money = models.IntegerField()
     token = models.CharField(max_length=255)
+    password = models.CharField(max_length=250)
 
     def create(self):
         pass
