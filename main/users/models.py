@@ -11,11 +11,27 @@ class OpUser(models.Model):
     money = models.IntegerField()
     token = models.CharField(max_length=255)
     password = models.CharField(max_length=250)
+    _team = models.ForeignKey("Team", on_delete=models.CASCADE, blank=True, null=True)
 
     def create(self):
         pass
 
 
+
 class Achievement(models.Model):
     name = models.CharField(max_length=250)
     user = models.ForeignKey("OpUser", on_delete=models.CASCADE)
+
+
+
+class Team(models.Model):
+    name = models.CharField(max_length=250)
+    owner = models.ForeignKey("OpUser", on_delete=models.CASCADE) 
+    
+    @property
+    def total_score(self):
+        return sum([sc.score for sc in self.opuser_set.all()])
+    
+    @property
+    def size(self):
+        return len(self.opuser_set.all())
