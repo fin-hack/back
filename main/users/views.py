@@ -39,3 +39,10 @@ class Achs(View):
         #    return JsonResponse(model_to_dict(user))
         #return JsonResponse({"msg": "Error"}, status=400)
         return JsonResponse({"achievements": list(achs)}, safe=False)
+
+
+class LeaderBoard(View):
+
+    def get(self, request):
+        best_user = OpUser.objects.order_by('score')[:10]
+        return JsonResponse({'leaderboard':list(best_user)}, safe=False)    
