@@ -3,6 +3,8 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views import View
 from users.models import OpUser
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 # Create your views here.
 
@@ -13,7 +15,10 @@ class Login(View):
         pass
 
     def post(self, request):
-        user = OpUser.objects.filter(mail=request.POST.get('mail'), password=request.POST.get('password')).first()
+        body = json.loads(request.body)
+        user = OpUser.objects.filter(mail=body.get('email'), password=body.get('password')).first()
+        print(request.body)
+        print(user)
         if user:
             return JsonResponse({"key": user.token})
         return JsonResponse({"msg": "Not found"}, status=400)
