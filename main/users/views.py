@@ -208,6 +208,18 @@ class ValuesView(View):
             return JsonResponse({"plan":user.docs_count_plan, "good": val_tr, "bad": val_fl, "percent": perc})
         return JsonResponse({}, status=400)
     
+class ValuesGraphView(View):
+
+    def get(self, request):
+        token = request.headers.get('key')
+        count = int(request.GET.get('count'))
+        user = OpUser.objects.filter(token=token).first()
+        if user:
+            vals = [user.get_value(i) for i in range(1, count+1)]
+            return JsonResponse({"values": vals})
+        return JsonResponse({}, status=400)
+            
+
     
     
 
