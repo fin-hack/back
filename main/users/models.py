@@ -38,6 +38,15 @@ class DocStatus(models.Model):
     day_end = models.IntegerField(default=datetime.today().day, blank=True)
     is_valid = models.BooleanField(default=False)
     owner = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name='docs')
+    
+    def __init__(self, *args, **kwargs):
+        super(DocStatus, self).__init__(*args, **kwargs)
+        if self.day_end != datetime.today().day:
+            for doc in self.owner.docs:
+                doc.delete()
+        new_doc = DocStatus(*args, **kwargs)
+        new_doc.save()
+
 
 
 class Achievement(models.Model):
