@@ -180,3 +180,21 @@ class PlaceInTeam(View):
                         return JsonResponse({'placce':'В конце списка'})
                 place+=1
         return JsonResponse({"msg": "Error"}, status=400)    
+    
+    
+    
+    
+
+class AnalysisTime(View):
+
+        def get(self, request):
+            token = request.headers.get('key')
+            user = OpUser.objects.filter(token=token).first()
+
+            if user:
+                k = user.count_docs_today(is_valid=True)/(user.count_docs_today(is_valid=True)+user.count_docs_today(is_valid=False))
+                user.docs_score =  user.docs_score + k * 5
+                return JsonResponse({'score':user.docs_score})
+            return JsonResponse({'msg':'Error'}, status=400)
+
+    
