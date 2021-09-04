@@ -51,8 +51,22 @@ class Achs(View):
 class LeaderBoard(View):
 
     def get(self, request):
-        best_user = OpUser.objects.order_by('score')[:10]
-        return JsonResponse({'leaderboard':list(best_user)}, safe=False)    
+        best_users = OpUser.objects.order_by('score')
+        token = request.headers.get("key")
+        user = OpUser.objects.filte(token=token).first()
+
+        if len(best_users) >= 10:
+            ans = list(best_users[:3])
+
+            for element in len(best_users):
+                if user == best_users[element]:
+                    for i in range(3,1, -1):
+                        ans.append(best_users[element - i])
+                    ans.append(user)
+                    for i in range(1, 3):
+                        ans.append(best_users[element + i])
+            return JsonResponse({'leaderboard':list(best_users)}, safe=False)
+        return JsonResponse({'leaderboard':list(best_users)}, safe=False)
 
 class UserTeam(View):
 
