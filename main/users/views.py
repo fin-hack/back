@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views import View
-from users.models import OpUser, Team, TeamTask
+from users.models import OpUser, Team, TeamTask, UserTask
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -113,24 +113,45 @@ def create_test():
     user._team = team
     user.save()
     
-class CreateTaskUser(View):
+class TaskUserView(View):
 
     def post(self, request):
         body = json.loads(request.body)
         user = request.headers.get("key")
         name = body.get('name')
         goal_score = body.get('goal_score')
-        completed = body.get('completed')
         if user:
-            UTask = UserTask(name=name, goal_score=goal_score, user=user, completed=completed)
-            UTask.save()
-            return JsonResponse(model_to_dict(UTask))
+            task = UserTask(name=name, goal_score=goal_score, user=user)
+            task.save()
+            return JsonResponse(model_to_dict(task))
         return JsonResponse({"msg": "Error"}, status=400)
 
     def get(self, request):
         token = request.headers.get('key')
         user = OpUser.objects.filter(token=token).first()
-        tasks = UserTask.objects.filter(user=user)
-        if tasks:
-            return JsonResponse({'usertask':list(tasks)}, safe = False)
+        if user:
+            tasks = UserTask.objects.filter(user=user)
+            _tasks = [model_to_dict(t) for t in tasks]
+            return JsonResponse({'usertask': _tasks}, safe = False)
         return JsonResponse({"msg": "Error"}, status=400)    
+
+class TeamUserView(View):
+
+    def post(self, request):
+        body = json.loads(request.body)
+        team = Team.objects.filter(id=body.get("id")).first()
+        name = body.get('name')
+        goal_score = body.get('goal_score')
+        if user:
+            task = TeamTask(name=name, goal_score=goal_score, user=user)
+            task.save()
+            return JsonResponse(model_to_dict(task))
+        return JsonResponse({"msg": "Error"}, status=400)
+
+    def get(self, request):
+        team = TeamTask.objects.filter(id=request.GET.get('id'))
+        if team:
+            tasks = TeamTask.objects.filter(team=team)
+            _tasks = [model_to_dict(t) for t in tasks]
+            return JsonResponse({'teamtask': _tasks}, safe = False)
+        return JsonResponse({"msg": "Error"}, status=400)

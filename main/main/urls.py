@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users.views import PersonalInfo, Achs, Login, LeaderBoard, UserTeam, IdTeam
+from users.views import PersonalInfo, Achs, Login, LeaderBoard, UserTeam, IdTeam, TaskUserView, TeamUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,5 +26,8 @@ urlpatterns = [
     path('users/leaderboard/', LeaderBoard.as_view()),
 
     path('users/team/', UserTeam.as_view()),
-    path('team/', IdTeam.as_view())
+    path('users/tasks/', TaskUserView.as_view()),
+
+    path('team/', IdTeam.as_view()),
+    path('team/tasks/', TeamUserView.as_view()),
 ]
