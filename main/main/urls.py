@@ -27,6 +27,7 @@ urlpatterns = [
 
     path('users/team/', UserTeam.as_view()),
     path('users/tasks/', TaskUserView.as_view()),
+    path('users/time/', TaskUserView.as_view()),
 
     path('team/', IdTeam.as_view()),
     path('team/myplace', IdTeam.as_view()),
