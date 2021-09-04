@@ -24,6 +24,6 @@ urlpatterns = [
     path('users/', PersonalInfo.as_view()),
     path('users/achievements/', Achs.as_view()),
     path('users/leaderboard/', LeaderBoard.as_view()),
-
+    path('users/quotes', SendQuotes.as_view()),
     path('users/team/', UserTeam.as_view()),
 ]
