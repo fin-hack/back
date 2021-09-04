@@ -171,6 +171,7 @@ class HandTaskUser(View):
     def get(self, request):
         _id = request.headers.get('key')
         us_task = UserTask.objects.filter(id=_id).first()
+        print(us_task)
         if us_task:
             _usesr = us_task.user
             us_task.now_score = us_task.goal_score
@@ -178,6 +179,7 @@ class HandTaskUser(View):
             winner = OpUser.objects.filter(_usesr).first()
             winner.money = winner.money + us_task.price
             winner.score = winner.score + 100 + random.randint(10, 50)
+            return JsonResponse({})
         return JsonResponse({'msg':'Error'}, status=400)
 
     
@@ -236,7 +238,8 @@ class ValuesView(View):
         if user:
             val_tr = user.count_docs_today(True, day)
             val_fl = user.count_docs_today(False, day)
-            perc = sum([user.get_value(i) for i in range(day)])/0.2
+            print(val_fl, val_tr)
+            perc = sum([user.get_value(i) for i in range(1, day+1)])/0.2
             print(perc)
             return JsonResponse({"plan":user.docs_count_plan, "good": val_tr, "bad": val_fl, "percent": perc})
         return JsonResponse({}, status=400)
@@ -251,7 +254,22 @@ class ValuesGraphView(View):
             vals = [user.get_value(i) for i in range(1, count+1)]
             return JsonResponse({"values": vals})
         return JsonResponse({})
-            
+
+
+
+class DocComplete(View):
+
+    def post(self, request):
+        token = request.headers.get('key')
+        user = OpUser.objects.filter(token=token).first()
+        if user:
+            dock = DocStatus(is_valid=True, owner=user)
+            team = user._team
+            team_tasks = team.teamtask_set.all()
+            dock.save()
+            return JsonResponse({"msg":"Success"})
+        return JsonResponse({"msg":"User doesnt exists"})
+
 
     
     
@@ -267,5 +285,4 @@ class AnalysisTime(View):
                 user.docs_score =  user.docs_score + k * 5
                 return JsonResponse({'score':user.docs_score})
             return JsonResponse({'msg':'Error'}, status=400)
-
-    
+ 

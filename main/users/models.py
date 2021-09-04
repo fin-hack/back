@@ -30,7 +30,7 @@ class OpUser(models.Model):
         return _team.teamtask_set.all()
 
     def count_docs_today(self, is_valid, day):
-        docs = self.docs.filter(day_end=day, is_valid=is_valid)
+        docs = DocStatus.objects.filter(owner=self, day_end=day, is_valid=is_valid)
         return len(docs) 
 
     def get_value(self, day):
