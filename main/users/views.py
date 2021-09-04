@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views import View
-from users.models import OpUser, Team, TeamTask, UserTask
+from users.models import OpUser, Team, TeamTask, UserTask, DocStatus
 from django.views.decorators.csrf import csrf_exempt
+import random
 import json
 
 # Create your views here.
@@ -96,7 +97,7 @@ class TeamTasks(View):
 
     def get(self, request):
         token = request.headers.get("key")
-        user = OpUser.objects.filter(token="123").first()
+        user = OpUser.objects.filter(token=token).first()
         tasks = user.get_team_tasks()
         if tasks:
             return JsonResponse(model_to_dict(tasks))
@@ -106,7 +107,7 @@ class TeamTasks(View):
 
 
 def create_test():
-    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John")
+    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John", docs_count_plan=10)
     user.save()
     team = Team(name='Dream Team', owner=user)
     team.save()
@@ -114,6 +115,18 @@ def create_test():
     user.save()
     team_task = TeamTask(name="Test task", goal_score=1000, now_score=0, team=team, status=0, price=300)
     team_task.save()
+    team_task = TeamTask(name="Test task 2", goal_score=1500, now_score=0, team=team, status=1, price=500)
+    team_task.save()
+    team_task = TeamTask(name="Test task 3", goal_score=1800, now_score=0, team=team, status=2, price=800)
+    team_task.save()
+
+    for i in range(20):
+        for _ in range(10):
+            _val = random.choice([True, False])
+            doc = DocStatus(is_valid=_val, day_end=i, owner=user) 
+            doc.save()
+            
+
     
 class TaskUserView(View):
 
@@ -152,9 +165,9 @@ class TeamUserView(View):
 
     def get(self, request):
         status = int(request.GET.get('status'))
-        team = TeamTask.objects.filter(id=request.GET.get('id'), status=status)
+        team = Team.objects.filter(id=request.GET.get('id')).first()
         if team:
-            tasks = TeamTask.objects.filter(team=team)
+            tasks = TeamTask.objects.filter(team=team, status=status)
             _tasks = [model_to_dict(t) for t in tasks]
             return JsonResponse({'teamtask': _tasks}, safe = False)
         return JsonResponse({"teamtask": []}, status=200)
@@ -180,7 +193,20 @@ class PlaceInTeam(View):
                         return JsonResponse({'placce':'В конце списка'})
                 place+=1
         return JsonResponse({"msg": "Error"}, status=400)    
-    
+
+class ValuesView(View):
+
+    def get(self, request):
+        token = request.headers.get('key')
+        day = int(request.GET.get('day'))
+        user = OpUser.objects.filter(token=token).first()
+        if user:
+            val_tr = user.count_docs_today(True, day)
+            val_fl = user.count_docs_today(False, day)
+            perc = sum([user.get_value(i) for i in range(day)])/0.2
+            print(perc)
+            return JsonResponse({"plan":user.docs_count_plan, "good": val_tr, "bad": val_fl, "percent": perc})
+        return JsonResponse({}, status=400)
     
     
     
@@ -192,7 +218,7 @@ class AnalysisTime(View):
             user = OpUser.objects.filter(token=token).first()
 
             if user:
-                k = user.count_docs_today(is_valid=True)/(user.count_docs_today(is_valid=True)+user.count_docs_today(is_valid=False))
+                k = user.count_docs_today(is_valid=True)/user.docs_count_plan
                 user.docs_score =  user.docs_score + k * 5
                 return JsonResponse({'score':user.docs_score})
             return JsonResponse({'msg':'Error'}, status=400)

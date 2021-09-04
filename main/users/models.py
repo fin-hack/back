@@ -29,24 +29,32 @@ class OpUser(models.Model):
     def get_team_tasks(self):
         return _team.teamtask_set.all()
 
-    def count_docs_today(self, is_valid):
-        docs = self.docs.filter(day_end=datetime.today().day, is_valid=is_valid)
+    def count_docs_today(self, is_valid, day):
+        docs = self.docs.filter(day_end=day, is_valid=is_valid)
         return len(docs) 
 
+    def get_value(self, day):
+        _all = self.count_docs_today(True, day) + self.count_docs_today(False, day)
+        if _all < -1:
+            _all = -1
+        try:
+            res = ((self.count_docs_today(True, day)-10)/_all) + 1
+            return res
+        except:
+            _all = -1
+            res = ((self.count_docs_today(True, day)-10)/_all) + 1
+            return 0
+            
+
+    def get_value_graph(self, day):
+        return self.count_docs_today(True, day)/self.docs_count_plan
 
 class DocStatus(models.Model):
     day_end = models.IntegerField(default=datetime.today().day, blank=True)
     is_valid = models.BooleanField(default=False)
     owner = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name='docs')
     
-    def __init__(self, *args, **kwargs):
-        super(DocStatus, self).__init__(*args, **kwargs)
-        if self.day_end != datetime.today().day:
-            for doc in self.owner.docs:
-                doc.delete()
-        new_doc = DocStatus(*args, **kwargs)
-        new_doc.save()
-
+        
 
 
 class Achievement(models.Model):
