@@ -106,12 +106,14 @@ class TeamTasks(View):
 
 
 def create_test():
-    user = OpUser(mail='mail', score=1, money=1, password='123', token='123')
+    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John")
     user.save()
-    team = Team(name='test_team', owner=user)
+    team = Team(name='Dream Team', owner=user)
     team.save()
     user._team = team
     user.save()
+    team_task = TeamTask(name="Test task", goal_score=1000, now_score=0, team=team, status=0, price=300)
+    team_task.save()
     
 class TaskUserView(View):
 
@@ -149,17 +151,15 @@ class TeamUserView(View):
         return JsonResponse({"msg": "Error"}, status=400)
 
     def get(self, request):
-        team = TeamTask.objects.filter(id=request.GET.get('id'))
+        status = int(request.GET.get('status'))
+        team = TeamTask.objects.filter(id=request.GET.get('id'), status=status)
         if team:
             tasks = TeamTask.objects.filter(team=team)
             _tasks = [model_to_dict(t) for t in tasks]
             return JsonResponse({'teamtask': _tasks}, safe = False)
-        return JsonResponse({"msg": "Error"}, status=400)
+        return JsonResponse({"teamtask": []}, status=200)
     
     
-    
-
-
 class PlaceInTeam(View):
 
     def get(self, request):

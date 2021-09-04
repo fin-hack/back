@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
+
+
 
 
 
@@ -13,12 +16,28 @@ class OpUser(models.Model):
     password = models.CharField(max_length=250)
     _team = models.ForeignKey("Team", on_delete=models.CASCADE, blank=True, null=True)
 
+    docs_count = models.FloatField(blank=True, null=True)
+    attention = models.FloatField(blank=True, null=True)
+    immersion = models.FloatField(blank=True, null=True)
+    stress_tolerance = models.FloatField(blank=True, null=True)
+
+    docs_count_plan = models.IntegerField(blank=True, null=True)   
+
     def create(self):
         pass
 
     def get_team_tasks(self):
         return _team.teamtask_set.all()
 
+    def count_docs_today(self, is_valid):
+        docs = self.docs.filter(day_end=datetime.today().day, is_valid=is_valid)
+        return len(docs) 
+
+
+class DocStatus(models.Model):
+    day_end = models.IntegerField(default=datetime.today().day, blank=True)
+    is_valid = models.BooleanField(default=False)
+    owner = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name='docs')
 
 
 class Achievement(models.Model):
@@ -46,7 +65,8 @@ class TeamTask(models.Model):
     goal_score = models.IntegerField()
     now_score = models.IntegerField(default=0)
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
-    completed = models.BooleanField(default=False)
+    status = models.IntegerField(default=0)
+    price = models.IntegerField(default=1)
     
 
 class UserTask(models.Model):
@@ -54,5 +74,6 @@ class UserTask(models.Model):
     goal_score = models.IntegerField()
     now_score = models.IntegerField(default=0)
     user = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name="tasks")
-    completed = models.BooleanField(default=False)
+    status = models.IntegerField(default=0)
+    price = models.IntegerField(default=1)
 
