@@ -164,6 +164,25 @@ class TaskUserView(View):
             return JsonResponse({'usertask': _tasks}, safe = False)
         return JsonResponse({"msg": "Error"}, status=400)    
 
+    
+
+class HandTaskUser(View):
+
+    def get(self, request):
+        _id = request.headers.get('key')
+        us_task = UserTask.objects.filter(id=_id).first()
+        if us_task:
+            _usesr = us_task.user
+            us_task.now_score = us_task.goal_score
+            us_task.status = 1# 1 - finish, 0 - not finish
+            winner = OpUser.objects.filter(_usesr).first()
+            winner.money = winner.money + us_task.price
+            winner.score = winner.score + 100 + random.randint(10, 50)
+        return JsonResponse({'msg':'Error'}, status=400)
+
+    
+    
+    
 class TeamUserView(View):
 
     def post(self, request):
