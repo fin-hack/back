@@ -121,7 +121,7 @@ class TeamTasks(View):
 
 
 def create_test():
-    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John", docs_count_plan=10)
+    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John", docs_count_plan=10, attention=54.5, stress_tolerance=80.0, immersion=45.5)
     user.save()
     team = Team(name='Dream Team', owner=user)
     team.save()
@@ -231,7 +231,7 @@ class ValuesGraphView(View):
         if user:
             vals = [user.get_value(i) for i in range(1, count+1)]
             return JsonResponse({"values": vals})
-        return JsonResponse({}, status=400)
+        return JsonResponse({})
             
 
     

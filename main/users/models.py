@@ -94,3 +94,7 @@ class UserTask(models.Model):
     status = models.IntegerField(default=0)
     price = models.IntegerField(default=1)
 
+
+
+class Product(models.Model):
+    pass
