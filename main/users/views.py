@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views import View
-from users.models import OpUser, Team
+from users.models import OpUser, Team, TeamTask
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -74,6 +74,15 @@ class UserTeam(View):
             return JsonResponse(model_to_dict(team))
         return JsonResponse({"msg": "Error"}, status=400)
             
+class IdTeam(View):
+
+    def get(self, request):
+        team = Team.objects.filter(id=request.GET.get('id')).first()
+        if team:
+            _team = model_to_dict(team)
+            users = [model_to_dict(inst) for inst in team.opuser_set.all()]
+            return JsonResponse({"team": _team, "users": users}, safe=False)
+        return JsonResponse({"msg": "Error"}, status=400)
         
     
 
@@ -83,6 +92,17 @@ class TeamView(View):
         teams = Team.objects.all()
         return JsonResponse({'teams':list(teams)}, safe=False)    
 
+class TeamTasks(View):
+
+    def get(self, request):
+        token = request.headers.get("key")
+        user = OpUser.objects.filter(token="123").first()
+        tasks = user.get_team_tasks()
+        if tasks:
+            return JsonResponse(model_to_dict(tasks))
+        return JsonResponse({"msg": "Not found"}, status=400)
+
+
 
 
 def create_test():
@@ -90,4 +110,6 @@ def create_test():
     user.save()
     team = Team(name='test_team', owner=user)
     team.save()
+    user._team = team
+    user.save()
     
