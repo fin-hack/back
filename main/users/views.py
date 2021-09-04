@@ -91,3 +91,19 @@ def create_test():
     team = Team(name='test_team', owner=user)
     team.save()
     
+class SendQuotes(View):
+
+    def get(self, request):
+        data_reader = open('users/Data/quotes.txt', 'r')
+        m_return = random.randint(0,98)
+        text_return = ''
+        index = 0
+        for line in data_reader:
+            if index == m_return:
+                text_return = line
+                break
+            index+=1
+        if text_return:
+            return JsonResponse({'quotes':text_return})
+        return JsonResponse({"msg": "Error"}, status=400)    
+    
