@@ -155,3 +155,28 @@ class TeamUserView(View):
             _tasks = [model_to_dict(t) for t in tasks]
             return JsonResponse({'teamtask': _tasks}, safe = False)
         return JsonResponse({"msg": "Error"}, status=400)
+    
+    
+    
+
+
+class PlaceInTeam(View):
+
+    def get(self, request):
+        token = request.headers.get('key')
+        user = OpUser.objects.filter(token=token).first()
+        if user:
+            number_team =  user.get('_team')
+            list_team = OpUser.objects.all().filter(_team = number_team).order_by('score')
+            place = 1
+            all = len(list_team)
+            for now_user in list_team:
+                if now_user.get('id') == user.get('id'):
+                    if place<all//3:
+                        return JsonResponse({'place':"В первых рядах"})
+                    if all//3 < place and all*2//3>place:
+                        return JsonResponse({'place':'Твердая середина'})
+                    else:
+                        return JsonResponse({'placce':'В конце списка'})
+                place+=1
+        return JsonResponse({"msg": "Error"}, status=400)    
