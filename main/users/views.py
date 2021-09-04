@@ -113,3 +113,24 @@ def create_test():
     user._team = team
     user.save()
     
+class CreateTaskUser(View):
+
+    def post(self, request):
+        body = json.loads(request.body)
+        user = request.headers.get("key")
+        name = body.get('name')
+        goal_score = body.get('goal_score')
+        completed = body.get('completed')
+        if user:
+            UTask = UserTask(name=name, goal_score=goal_score, user=user, completed=completed)
+            UTask.save()
+            return JsonResponse(model_to_dict(UTask))
+        return JsonResponse({"msg": "Error"}, status=400)
+
+    def get(self, request):
+        token = request.headers.get('key')
+        user = OpUser.objects.filter(token=token).first()
+        tasks = UserTask.objects.filter(user=user)
+        if tasks:
+            return JsonResponse({'usertask':list(tasks)}, safe = False)
+        return JsonResponse({"msg": "Error"}, status=400)    
