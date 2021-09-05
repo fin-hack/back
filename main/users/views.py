@@ -53,7 +53,7 @@ class LeaderBoard(View):
     def get(self, request):
         best_users = OpUser.objects.order_by('score')
         token = request.headers.get("key")
-        user = OpUser.objects.filte(token=token).first()
+        user = OpUser.objects.filter(token=token).first()
 
         if len(best_users) >= 10:
             ans = list(best_users[:3])
@@ -67,6 +67,22 @@ class LeaderBoard(View):
                         ans.append(best_users[element + i])
             return JsonResponse({'leaderboard':list(best_users)}, safe=False)
         return JsonResponse({'leaderboard':list(best_users)}, safe=False)
+
+class TeamLeaderBoard(View):
+
+    def get(self, request):
+        teams = sorted(Team.objects.all(), key=lambda t: t.total_score)
+        _teams = []
+        if teams:
+            for i in teams:
+                d = model_to_dict(i)
+                d['score'] = i.total_score
+                _teams.append(d)
+        
+            return JsonResponse({'leaderboard':_teams}, safe=False)
+        return JsonResponse({'leaderboard':_teams}, safe=False)
+
+
 
 class UserTeam(View):
 
@@ -121,24 +137,26 @@ class TeamTasks(View):
 
 
 def create_test():
-    user = OpUser(mail='work-mail@mail.ru', score=2324, money=1239, password='test', token='123', first_name="Alex", last_name="John", docs_count_plan=10, attention=54.5, stress_tolerance=80.0, immersion=45.5)
+    user = OpUser(mail='work-mail@mail.ru', score=150, money=1239, password='test', token='123', first_name="Екатерина", last_name="Антонова", docs_count_plan=10, attention=54.5, stress_tolerance=80.0, immersion=45.5)
     user.save()
     team = Team(name='Dream Team', owner=user)
     team.save()
     user._team = team
     user.save()
-    team_task = TeamTask(name="Test task", goal_score=1000, now_score=0, team=team, status=0, price=300)
-    team_task.save()
-    team_task = TeamTask(name="Test task 2", goal_score=1500, now_score=0, team=team, status=1, price=500)
-    team_task.save()
-    team_task = TeamTask(name="Test task 3", goal_score=1800, now_score=0, team=team, status=2, price=800)
-    team_task.save()
-
-    for i in range(20):
+    for i in range(21):
         for _ in range(10):
             _val = random.choice([True, False])
             doc = DocStatus(is_valid=_val, day_end=i, owner=user) 
             doc.save()
+    user = OpUser(mail='work-mail@mail.ru', score=200, money=1239, password='test', token='123456', first_name="Александра", last_name="Иванова", docs_count_plan=10, attention=54.5, stress_tolerance=80.0, immersion=45.5, _team=team)
+    user.save()
+    team_task = TeamTask(name="Успешно верифицировать 10 документов", goal_score=10, now_score=0, team=team, status=0, price=300)
+    team_task.save()
+    team_task = TeamTask(name="Проверить 15 документов", goal_score=15, now_score=7, team=team, status=1, price=500)
+    team_task.save()
+    team_task = TeamTask(name="Сделать за смену не более 5 ошибок в проверке", goal_score=5, now_score=5, team=team, status=2, price=800)
+    team_task.save()
+
             
 
     
@@ -256,7 +274,6 @@ class ValuesGraphView(View):
         return JsonResponse({})
 
 
-
 class DocComplete(View):
 
     def post(self, request):
@@ -270,9 +287,6 @@ class DocComplete(View):
             return JsonResponse({"msg":"Success"})
         return JsonResponse({"msg":"User doesnt exists"})
 
-
-    
-    
 
 class AnalysisTime(View):
 

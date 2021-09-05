@@ -54,14 +54,9 @@ class DocStatus(models.Model):
     is_valid = models.BooleanField(default=False)
     owner = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name='docs')
     
-        
-
-
 class Achievement(models.Model):
     name = models.CharField(max_length=250)
     user = models.ForeignKey("OpUser", on_delete=models.CASCADE)
-
-
 
 class Team(models.Model):
     name = models.CharField(max_length=250)
@@ -74,8 +69,6 @@ class Team(models.Model):
     @property
     def size(self):
         return len(self.opuser_set.all())
-    
-
 
 class TeamTask(models.Model):
     name = models.CharField(max_length=250)
@@ -84,7 +77,6 @@ class TeamTask(models.Model):
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
     status = models.IntegerField(default=0)
     price = models.IntegerField(default=1)
-    
 
 class UserTask(models.Model):
     name = models.CharField(max_length=250)
@@ -93,8 +85,6 @@ class UserTask(models.Model):
     user = models.ForeignKey("OpUser", on_delete=models.CASCADE, related_name="tasks")
     status = models.IntegerField(default=0)
     price = models.IntegerField(default=1)
-
-
 
 class Product(models.Model):
     pass
