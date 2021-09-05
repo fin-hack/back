@@ -5,6 +5,7 @@ from django.views import View
 from users.models import OpUser, Team, TeamTask, UserTask, DocStatus
 from django.views.decorators.csrf import csrf_exempt
 import random
+import string
 import json
 
 # Create your views here.
@@ -300,3 +301,29 @@ class AnalysisTime(View):
                 return JsonResponse({'score':user.docs_score})
             return JsonResponse({'msg':'Error'}, status=400)
  
+
+
+
+
+def get_random_string(length):
+    # choose from all lowercase letter
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
+
+
+def initializate_hungred_users(num, docs_count_plan=10):
+    if num >= 30:
+        num = 30
+
+    male_name = ['Авраам', 'Александр', 'Альберт', 'Бенджамин', 'Амир', 'Григорий', 'Влас']
+    female_name = ['Малышев', 'Котов', 'Рогов', 'Сергеев', 'Гордеев', 'Андреев','Петухов', 'Плотников', 'Сафонов']
+
+    for i in range(num):
+        mail = str(get_random_string(10)) + str('@gmail.com')
+        user = OpUser(mail=mail, score=0, money=0,
+                      password='123', token=get_random_string(random.randint(5,8)),
+                      first_name=male_name[random.randint(0,len(male_name)-1)],
+                      last_name=female_name[random.randint(0,len(female_name)-1)],
+                      docs_count_plan=docs_count_plan)
+        user.save()
